@@ -36,6 +36,14 @@ def main():
         # Draw game board
         game.update()
 
+        # Get game status
+        game_status = game.get_status()
+
+        if game_status != NOT_OVER:
+            is_game_running = False
+            print("First player win!!!" if game_status == FIRST_PLAYER_WIN else "Second player win!!!"
+            if game_status == SECOND_PLAYER_WIN else "Tie!!!")
+
     # Closing window
     pg.quit()
 

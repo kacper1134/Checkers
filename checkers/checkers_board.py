@@ -7,6 +7,7 @@ class CheckersBoard:
         self.first_player_pieces_left = self.second_player_pieces_left = 8
         self.first_player_kings = self.second_player_kings = 0
         self.number_of_turn = 1
+        self.turn_of_first_king = None
         self.create_pieces()
 
     def draw_board(self, window):
@@ -62,6 +63,11 @@ class CheckersBoard:
         if second_player_piece_become_king:
             self.second_player_kings += 1
             piece.become_king()
+
+        self.number_of_turn += 1
+
+        if (first_player_piece_become_king or second_player_piece_become_king) and not self.turn_of_first_king:
+            self.turn_of_first_king = self.number_of_turn
 
     def get_piece(self, row, column):
         return self.board[row][column]

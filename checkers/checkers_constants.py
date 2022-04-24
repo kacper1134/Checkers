@@ -35,3 +35,9 @@ RIGHT = 1
 # Images
 CROWN_IMAGE = pg.image.load('assets/crown.png')
 CROWN_IMAGE = pg.transform.scale(CROWN_IMAGE, (WIDTH // 16, HEIGHT // 28))
+
+# Game Statues
+NOT_OVER = -1
+TIE = 0
+FIRST_PLAYER_WIN = 1
+SECOND_PLAYER_WIN = 2

@@ -33,6 +33,20 @@ class CheckersGame:
             if piece and piece.color == self.current_turn:
                 self.selected_piece = piece
 
+    def get_status(self):
+        king_tie_result = self.board.turn_of_first_king and self.board.number_of_turn - \
+                          self.board.turn_of_first_king == 15
+        if king_tie_result:
+            return TIE
+
+        if self.board.second_player_pieces_left == 0 or self.no_valid_moves and self.current_turn == SECOND_PLAYER_COLOR:
+            return FIRST_PLAYER_WIN
+
+        if self.board.first_player_pieces_left == 0 or self.no_valid_moves and self.current_turn == FIRST_PLAYER_COLOR:
+            return SECOND_PLAYER_WIN
+
+        return NOT_OVER
+
     def __move_piece(self, row, column):
         piece = self.board.get_piece(row, column)
         correct_move = not piece and (row, column) in self.valid_moves[self.selected_piece]
@@ -46,13 +60,18 @@ class CheckersGame:
         self.current_turn = FIRST_PLAYER_COLOR
         self.valid_moves = {}
         self.beaten_pieces = {piece: {} for row in self.board.board for piece in row if piece}
+        self.no_valid_moves = True
         self.__calculate_valid_moves()
 
     def __calculate_valid_moves(self):
+        self.no_valid_moves = True
         for row in self.board.board:
             for piece in row:
                 if piece and piece.color == self.current_turn:
                     valid_moves = self.board.get_valid_moves(piece)
+                    if valid_moves:
+                        self.no_valid_moves = False
+
                     self.valid_moves[piece] = {valid_move[0] for valid_move in valid_moves}
                     self.beaten_pieces[piece]["all"] = {piece for valid_move in valid_moves
                                                         for piece in valid_move[1] if valid_move[1]}
