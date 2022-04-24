@@ -80,6 +80,26 @@ class CheckersGame:
                                                            for piece in valid_move[1] if valid_move[1]
                                                            and valid_move[0] == move}
 
+        self.__leave_only_best_moves()
+
+    def __leave_only_best_moves(self):
+        pieces = [piece for row in self.board.board for piece in row if piece and piece.color == self.current_turn]
+
+        best_piece = (None, -1)
+        for piece in pieces:
+            for move in self.valid_moves[piece]:
+                current_piece = (piece, len(self.beaten_pieces[piece][move]))
+                if best_piece[1] < current_piece[1]:
+                    best_piece = current_piece
+
+        for piece in pieces:
+            copy_valid_moves = self.valid_moves[piece].copy()
+            for move in self.valid_moves[piece]:
+                current_piece = (piece, len(self.beaten_pieces[piece][move]))
+                if current_piece[1] != best_piece[1]:
+                    copy_valid_moves.remove(move)
+            self.valid_moves[piece] = copy_valid_moves
+
     def __draw_valid_moves(self):
         if self.selected_piece:
             for move in self.valid_moves[self.selected_piece]:
