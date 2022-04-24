@@ -70,11 +70,13 @@ class CheckersBoard:
         beaten_pieces = []
         valid_movements = self.__get_valid_movements(piece.row, piece.column, piece.direction, piece.color,
                                                      beaten_pieces)
+        if valid_movements == ([], []):
+            return []
+        return [(movement[0][0], movement[1]) for movement in valid_movements]
 
-        if valid_movements == [([], [])]:
-            return {}
-
-        return {movement[0][0] for movement in valid_movements}
+    def erase_pieces(self, pieces):
+        for piece in pieces:
+            self.board[piece.row][piece.column] = None
 
     def __get_valid_movements(self, row, column, direction, color, beaten_pieces):
         reversed_direction = self.__get_reverse_vertical_direction(direction)
@@ -108,16 +110,19 @@ class CheckersBoard:
                             beaten_pieces.append(beaten_piece)
                             move_result = self.__get_valid_movements(row, column, direction, color,
                                                                      beaten_pieces.copy())
-                            for r in move_result:
-                                r[1].append(beaten_piece)
-                                r[0].append((row, column))
-                            results = move_result
+                            if move_result == ([], []):
+                                results.append(([(row, column)], [beaten_piece]))
+                            else:
+                                for r in move_result:
+                                    r[1].append(beaten_piece)
+                                    r[0].append((row, column))
+                                    results.append(r)
                         elif not beaten_piece:
                             results.append(([(row, column)], []))
                 index += 1
 
         if not results:
-            return [([], [])]
+            return [], []
         return self.__get_best_results(results)
 
     def __get_reverse_vertical_direction(self, direction):
