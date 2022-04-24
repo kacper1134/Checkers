@@ -47,6 +47,17 @@ class CheckersGame:
 
         return NOT_OVER
 
+    def get_valid_moves(self):
+        return self.valid_moves
+
+    def computer_move_piece(self, row, column, piece):
+        self.selected_piece = piece
+        self.__move_piece(row, column)
+        self.current_turn = self.__get_next_turn()
+        self.board.erase_pieces(self.beaten_pieces[self.selected_piece][(row, column)])
+        self.selected_piece = None
+        self.__calculate_valid_moves()
+
     def __move_piece(self, row, column):
         piece = self.board.get_piece(row, column)
         correct_move = not piece and (row, column) in self.valid_moves[self.selected_piece]

@@ -1,4 +1,5 @@
-from checkers.checkers_game import *
+from checkers.checkers_game import CheckersGame
+from checkers.checkers_player import *
 
 # Game settings
 FPS = 60
@@ -8,33 +9,26 @@ GAME_WINDOW = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption('Checkers')
 
 
-def get_row_and_column_from_mouse_position(position):
-    x, y = position
-    return y // FIELD_SIZE, x // FIELD_SIZE
-
-
 # Game loop
 def main():
+
     is_game_running = True
     clock = pg.time.Clock()
     game = CheckersGame(GAME_WINDOW)
+    players = [RandomPlayer(FIRST_PLAYER_COLOR, game), RandomPlayer(SECOND_PLAYER_COLOR, game)]
+    current_player = 0
 
     while is_game_running:
         clock.tick(FPS)
 
-        # Event loop
-        for event in pg.event.get():
-            # Quiting game event
-            if event.type == pg.QUIT:
-                is_game_running = False
-
-            if event.type == pg.MOUSEBUTTONDOWN:
-                mouse_position = pg.mouse.get_pos()
-                row, column = get_row_and_column_from_mouse_position(mouse_position)
-                game.select(row, column)
-
         # Draw game board
         game.update()
+
+        if not players[current_player].make_move():
+            is_game_running = False
+
+        if players[current_player].color != game.current_turn:
+            current_player = (current_player + 1) % 2
 
         # Get game status
         game_status = game.get_status()
