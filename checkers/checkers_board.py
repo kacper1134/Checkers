@@ -73,15 +73,15 @@ class CheckersBoard:
         return self.board[row][column]
 
     def get_valid_moves(self, piece):
-        beaten_pieces = []
+        beaten_pieces = set()
         if piece.is_king:
-            valid_movements = self.__get_valid_movements_for_king(piece.row, piece.column, piece.color, beaten_pieces)
+            valid_movements = self.__get_valid_movements_for_king(piece.row, piece.column, piece.color)
         else:
             valid_movements = self.__get_valid_movements(piece.row, piece.column, piece.direction, piece.color,
                                                          beaten_pieces)
         if valid_movements == ([], []):
             return []
-        print(valid_movements)
+
         return [(movement[0][0], movement[1]) for movement in valid_movements]
 
     def erase_pieces(self, pieces):
@@ -117,7 +117,7 @@ class CheckersBoard:
                     if result:
                         row, column, beaten_piece = result
                         if beaten_piece and beaten_piece not in beaten_pieces:
-                            beaten_pieces.append(beaten_piece)
+                            beaten_pieces.add(beaten_piece)
                             move_result = self.__get_valid_movements(row, column, direction, color,
                                                                      beaten_pieces.copy())
                             if move_result == ([], []):
@@ -135,13 +135,24 @@ class CheckersBoard:
             return [], []
         return self.__get_best_results(results)
 
-    def __get_valid_movements_for_king(self, row, column, color, beaten_pieces):
+    def __get_valid_movements_for_king(self, row, column, color):
         results = []
-        if not beaten_pieces:
-            self.__get_king_movement_in_column(row, column, results)
+
+        self.__get_king_movement_in_column(row, column, results)
 
         self.__get_king_movement_in_diagonal(row, column, results)
-        return results
+
+        beats_result = []
+        self.__get_king_beats_movement(row, column, color, set(), beats_result)
+
+        if beats_result:
+            self.__get_best_results(beats_result)
+            results = beats_result
+
+        if not results:
+            return [], []
+
+        return self.__get_best_results(results)
 
     def __get_reverse_vertical_direction(self, direction):
         return UP if direction == DOWN else DOWN
@@ -180,10 +191,10 @@ class CheckersBoard:
 
     def __get_king_movement_in_diagonal(self, row, column, results):
         # Up Left king movement
-        self.__calculate_king_movement_in_diagonal(row + UP, 0, UP, column + LEFT, -1, LEFT, results)
+        self.__calculate_king_movement_in_diagonal(row + UP, -1, UP, column + LEFT, -1, LEFT, results)
 
         # Up Right king movement
-        self.__calculate_king_movement_in_diagonal(row + UP, 0, UP, column + RIGHT, NUMBER_OF_COLUMNS, RIGHT, results)
+        self.__calculate_king_movement_in_diagonal(row + UP, -1, UP, column + RIGHT, NUMBER_OF_COLUMNS, RIGHT, results)
 
         # Down Left king movement
         self.__calculate_king_movement_in_diagonal(row + DOWN, NUMBER_OF_ROWS, DOWN, column + LEFT, -1, LEFT, results)
@@ -191,6 +202,37 @@ class CheckersBoard:
         # Down Right king movement
         self.__calculate_king_movement_in_diagonal(row + DOWN, NUMBER_OF_ROWS, DOWN, column + RIGHT, NUMBER_OF_COLUMNS,
                                                    RIGHT, results)
+
+    def __get_king_beats_movement(self, row, column, color, beaten_pieces, results):
+        if beaten_pieces:
+            results.append(([(row, column)], beaten_pieces))
+        # Up Left king beats
+        self.__beat_king(row, -1, column, -1, UP, LEFT, color, beaten_pieces.copy(), results)
+
+        # Up Right king beats
+        self.__beat_king(row, -1, column, NUMBER_OF_COLUMNS, UP, RIGHT, color, beaten_pieces.copy(), results)
+
+        # Down Left king beats
+        self.__beat_king(row, NUMBER_OF_ROWS, column, -1, DOWN, LEFT, color, beaten_pieces.copy(), results)
+
+        # Down Right king beats
+        self.__beat_king(row, NUMBER_OF_ROWS, column, NUMBER_OF_COLUMNS, DOWN, RIGHT, color, beaten_pieces.copy(),
+                         results)
+
+    def __beat_king(self, row, end_row, column, end_column, vertical_direction, horizontal_direction, color,
+                    beaten_pieces, results):
+        king_beats = self.__calculate_king_beats(row + vertical_direction, end_row, vertical_direction,
+                                                 column + horizontal_direction, end_column, horizontal_direction, color)
+        if king_beats:
+            beaten_piece = king_beats[1][0]
+            if beaten_piece not in beaten_pieces:
+                beaten_pieces.add(beaten_piece)
+                empty_fields = self.__get_empty_fields_after_piece(beaten_piece.row + vertical_direction, end_row,
+                                                                   vertical_direction, beaten_piece.column +
+                                                                   horizontal_direction, end_column,
+                                                                   horizontal_direction)
+                for field in empty_fields:
+                    self.__get_king_beats_movement(field[0], field[1], color, beaten_pieces, results)
 
     def __calculate_king_movement_in_column(self, start, end, step, column, king_movement):
         for row in range(start, end, step):
@@ -212,3 +254,33 @@ class CheckersBoard:
             else:
                 return
             column += step_column
+
+    def __calculate_king_beats(self, start_row, end_row, step_row, start_column, end_column, step_column, color):
+        column = start_column
+        for row in range(start_row, end_row, step_row):
+            if column == end_column:
+                return None
+            piece = self.board[row][column]
+            if piece:
+                if self.__can_beat(row + step_row, column + step_column, piece, color):
+                    if not self.board[row + step_row][column + step_column]:
+                        return [(row + step_row, column + step_column)], [piece]
+                    else:
+                        return None
+                else:
+                    return None
+            column += step_column
+
+    def __get_empty_fields_after_piece(self, start_row, end_row, step_row, start_column, end_column, step_column):
+        empty_fields = []
+        column = start_column
+        for row in range(start_row, end_row, step_row):
+            if column == end_column:
+                return empty_fields
+            piece = self.board[row][column]
+            if not piece:
+                empty_fields.append((row, column))
+            else:
+                return empty_fields
+            column += step_column
+        return empty_fields

@@ -6,7 +6,7 @@ class CheckerPiece:
         self.row = row
         self.column = column
         self.color = color
-        self.is_king = True
+        self.is_king = False
         self.direction = UP if color == FIRST_PLAYER_COLOR else DOWN
         self.position = (0, 0)
         self.calculate_position()
