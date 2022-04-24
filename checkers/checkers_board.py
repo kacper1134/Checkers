@@ -74,10 +74,14 @@ class CheckersBoard:
 
     def get_valid_moves(self, piece):
         beaten_pieces = []
-        valid_movements = self.__get_valid_movements(piece.row, piece.column, piece.direction, piece.color,
-                                                     beaten_pieces)
+        if piece.is_king:
+            valid_movements = self.__get_valid_movements_for_king(piece.row, piece.column, piece.color, beaten_pieces)
+        else:
+            valid_movements = self.__get_valid_movements(piece.row, piece.column, piece.direction, piece.color,
+                                                         beaten_pieces)
         if valid_movements == ([], []):
             return []
+        print(valid_movements)
         return [(movement[0][0], movement[1]) for movement in valid_movements]
 
     def erase_pieces(self, pieces):
@@ -131,6 +135,14 @@ class CheckersBoard:
             return [], []
         return self.__get_best_results(results)
 
+    def __get_valid_movements_for_king(self, row, column, color, beaten_pieces):
+        results = []
+        if not beaten_pieces:
+            self.__get_king_movement_in_column(row, column, results)
+
+        self.__get_king_movement_in_diagonal(row, column, results)
+        return results
+
     def __get_reverse_vertical_direction(self, direction):
         return UP if direction == DOWN else DOWN
 
@@ -157,3 +169,46 @@ class CheckersBoard:
 
     def __can_move_to_field(self, row, column):
         return row != -1 and row != NUMBER_OF_ROWS and column != -1 and column != NUMBER_OF_COLUMNS
+
+    def __get_king_movement_in_column(self, row, column, results):
+
+        # Up king movement
+        self.__calculate_king_movement_in_column(row + 2, NUMBER_OF_ROWS, 2, column, results)
+
+        # Down king movement
+        self.__calculate_king_movement_in_column(row - 2, -1, -2, column, results)
+
+    def __get_king_movement_in_diagonal(self, row, column, results):
+        # Up Left king movement
+        self.__calculate_king_movement_in_diagonal(row + UP, 0, UP, column + LEFT, -1, LEFT, results)
+
+        # Up Right king movement
+        self.__calculate_king_movement_in_diagonal(row + UP, 0, UP, column + RIGHT, NUMBER_OF_COLUMNS, RIGHT, results)
+
+        # Down Left king movement
+        self.__calculate_king_movement_in_diagonal(row + DOWN, NUMBER_OF_ROWS, DOWN, column + LEFT, -1, LEFT, results)
+
+        # Down Right king movement
+        self.__calculate_king_movement_in_diagonal(row + DOWN, NUMBER_OF_ROWS, DOWN, column + RIGHT, NUMBER_OF_COLUMNS,
+                                                   RIGHT, results)
+
+    def __calculate_king_movement_in_column(self, start, end, step, column, king_movement):
+        for row in range(start, end, step):
+            piece = self.board[row][column]
+            if not piece:
+                king_movement.append(([(row, column)], []))
+            else:
+                return
+
+    def __calculate_king_movement_in_diagonal(self, start_row, end_row, step_row, start_column, end_column, step_column,
+                                              king_movement):
+        column = start_column
+        for row in range(start_row, end_row, step_row):
+            if column == end_column:
+                return
+            piece = self.board[row][column]
+            if not piece:
+                king_movement.append(([(row, column)], []))
+            else:
+                return
+            column += step_column
