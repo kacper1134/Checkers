@@ -25,7 +25,7 @@ class CheckersBoard:
 
     def create_pieces(self):
         # Place second player pieces
-        for row in range(NUMBER_OF_ROWS // 2 - 2):
+        for row in range(NUMBER_OF_ROWS // 2 - NUMBER_OF_EMPTY_ROWS // 2):
             self.board.append([])
             for column in range(NUMBER_OF_COLUMNS):
                 if row % 2 != column % 2:
@@ -34,13 +34,13 @@ class CheckersBoard:
                     self.board[row].append(None)
 
         # Empty rows
-        for row in range(NUMBER_OF_ROWS // 2 - 2, NUMBER_OF_ROWS // 2 + 2):
+        for row in range(NUMBER_OF_ROWS // 2 - NUMBER_OF_EMPTY_ROWS // 2, NUMBER_OF_ROWS // 2 + NUMBER_OF_EMPTY_ROWS // 2):
             self.board.append([])
             for column in range(NUMBER_OF_COLUMNS):
                 self.board[row].append(None)
 
         # Place first player pieces
-        for row in range(NUMBER_OF_ROWS // 2 + 2, NUMBER_OF_ROWS):
+        for row in range(NUMBER_OF_ROWS // 2 + NUMBER_OF_EMPTY_ROWS // 2, NUMBER_OF_ROWS):
             self.board.append([])
             for column in range(NUMBER_OF_COLUMNS):
                 if row % 2 != column % 2:
@@ -87,6 +87,10 @@ class CheckersBoard:
     def erase_pieces(self, pieces):
         for piece in pieces:
             self.board[piece.row][piece.column] = None
+            if piece.color == FIRST_PLAYER_COLOR:
+                self.first_player_pieces_left -= 1
+            else:
+                self.second_player_pieces_left -= 1
 
     def __get_valid_movements(self, row, column, direction, color, beaten_pieces):
         reversed_direction = self.__get_reverse_vertical_direction(direction)

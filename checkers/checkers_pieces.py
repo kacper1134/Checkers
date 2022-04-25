@@ -3,6 +3,7 @@ from .checkers_constants import *
 
 class CheckerPiece:
     def __init__(self, row, column, color):
+        self.initial_position = (row, column)
         self.row = row
         self.column = column
         self.color = color
@@ -38,3 +39,11 @@ class CheckerPiece:
     # DELETE AFTER DEVELOPMENT
     def __repr__(self):
         return str(self.color)
+
+    def __eq__(self, other):
+        if not other:
+            return False
+        return self.initial_position == other.initial_position
+
+    def __hash__(self):
+        return hash(self.initial_position)
