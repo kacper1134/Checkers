@@ -1,3 +1,5 @@
+import time
+
 from checkers.checkers_board import CheckersBoard
 from .checkers_constants import *
 
@@ -13,6 +15,7 @@ class CheckersGame:
         pg.display.update()
 
     def reset(self):
+        time.sleep(1)
         self.__initialize_game()
 
     def select(self, row, column):

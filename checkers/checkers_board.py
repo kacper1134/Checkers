@@ -54,8 +54,8 @@ class CheckersBoard:
         self.board[previous_row][previous_column] = None
         self.board[row][column] = piece
 
-        first_player_piece_become_king = row == 0
-        second_player_piece_become_king = row == NUMBER_OF_ROWS - 1
+        first_player_piece_become_king = row == 0 and piece.color == FIRST_PLAYER_COLOR
+        second_player_piece_become_king = row == NUMBER_OF_ROWS - 1 and piece.color == SECOND_PLAYER_COLOR
 
         if first_player_piece_become_king:
             self.first_player_kings += 1

@@ -34,6 +34,7 @@ def main():
         game_status = game.get_status()
 
         if game_status != NOT_OVER:
+            game.update(GAME_WINDOW)
             if game_status == FIRST_PLAYER_WIN:
                 game_results["First"] += 1
             elif game_status == SECOND_PLAYER_WIN:
