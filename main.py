@@ -1,6 +1,6 @@
 from checkers.checkers_game import CheckersGame
-from checkers.checkers_pieces import CheckerPiece
 from checkers.checkers_player import *
+import ctypes
 
 # Game settings
 FPS = 60
@@ -15,7 +15,7 @@ def main():
     is_game_running = True
     clock = pg.time.Clock()
     game = CheckersGame()
-    players = [RandomPlayer(FIRST_PLAYER_COLOR, game), MiniMaxPlayer(SECOND_PLAYER_COLOR, game, 1)]
+    players = [MiniMaxPlayer(FIRST_PLAYER_COLOR, game, 6), HumanPlayer(SECOND_PLAYER_COLOR, game)]
     current_player = 0
     game_results = {"First": 0, "Second": 0, "Tie": 0}
     while is_game_running:
@@ -41,10 +41,11 @@ def main():
                 game_results["Second"] += 1
             else:
                 game_results["Tie"] += 1
-            print(game_results)
+
             # is_game_running = False
-            print("First player win!!!" if game_status == FIRST_PLAYER_WIN else "Second player win!!!"
-                  if game_status == SECOND_PLAYER_WIN else "Tie!!!")
+            text = "First player win!!!" if game_status == FIRST_PLAYER_WIN else "Second player win!!!" \
+                if game_status == SECOND_PLAYER_WIN else "Tie!!!"
+            ctypes.windll.user32.MessageBoxW(0, text, "Game result", 0)
             game.reset()
 
     # Closing window

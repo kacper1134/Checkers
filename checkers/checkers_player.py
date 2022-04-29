@@ -61,11 +61,11 @@ class MiniMaxPlayer:
         self.visited_nodes = 0
         best_move = self.__get_best_move(copy.deepcopy(self.game), 0, None, None)
         self.game.computer_move_piece(best_move[0][0], best_move[0][1], best_move[2])
-        # print(f"Visited {self.visited_nodes} nodes")
+        print(f"Visited {self.visited_nodes} nodes")
 
         return True
 
-    def __get_best_move(self, local_game, level, move, piece):
+    def __get_best_move(self, local_game, level, move, piece, alpha=MINUS_INFINITY, beta=PLUS_INFINITY):
         self.visited_nodes += 1
         # Make a move
         if move:
@@ -80,14 +80,36 @@ class MiniMaxPlayer:
 
         # Player turn - try to maximize result
         if local_game.current_turn == self.color:
-            best_move = max([(move, piece, self.__get_best_move(copy.deepcopy(local_game), level + 1, move, piece))
-                            for piece in pieces for move in valid_moves[piece]],
-                            key=lambda another_player_move: another_player_move[2][1])
-            return best_move[0], best_move[2][1], best_move[1]
+            best_move = (None, MINUS_INFINITY, None)
+
+            for piece in pieces:
+                for move in valid_moves[piece]:
+                    current_move = self.__get_best_move(copy.deepcopy(local_game), level + 1, move, piece, alpha, beta)
+                    if current_move[1] > best_move[1]:
+                        best_move = (move, current_move[1], piece)
+
+                        if best_move[1] > alpha:
+                            alpha = current_move[1]
+
+                        if alpha >= beta:
+                            return best_move
+
+            return best_move
 
         # Another Player turn - try to minimize result
         else:
-            best_move = min([(move, piece, self.__get_best_move(copy.deepcopy(local_game), level + 1, move, piece))
-                            for piece in pieces for move in valid_moves[piece]],
-                            key=lambda another_player_move: another_player_move[2][1])
-            return best_move[0], best_move[2][1], best_move[1]
+            best_move = (None, PLUS_INFINITY, None)
+
+            for piece in pieces:
+                for move in valid_moves[piece]:
+                    current_move = self.__get_best_move(copy.deepcopy(local_game), level + 1, move, piece, alpha, beta)
+                    if current_move[1] < best_move[1]:
+                        best_move = (move, current_move[1], piece)
+
+                        if best_move[1] < beta:
+                            beta = current_move[1]
+
+                        if alpha >= beta:
+                            return best_move
+
+            return best_move

@@ -4,7 +4,7 @@ from .checkers_pieces import *
 class CheckersBoard:
     def __init__(self):
         self.board = []
-        self.first_player_pieces_left = self.second_player_pieces_left = 8
+        self.first_player_pieces_left = self.second_player_pieces_left = NUMBER_OF_PIECES
         self.first_player_kings = self.second_player_kings = 0
         self.number_of_turn = 1
         self.turn_of_first_king = None
@@ -81,7 +81,6 @@ class CheckersBoard:
                                                          beaten_pieces)
         if valid_movements == ([], []):
             return []
-
         return [(movement[0][0], movement[1]) for movement in valid_movements]
 
     def erase_pieces(self, pieces):
